@@ -75,35 +75,35 @@
         var input = document.getElementById('input');
         var messages = document.getElementById('messages');
 
+        function createMessage(msg) {
+            var item = document.createElement('li');
+            item.innerHTML = msg;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
         // Client sending messages
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             if (input.value) {
-                socket.emit('chat message', input.value);
+                const msg = input.value;
+                socket.emit('chat message', msg);
                 input.value = '';
+                createMessage(msg);
             }
         });
 
         // Client receiving messages
         socket.on('chat message', function (msg) {
-            var item = document.createElement('li');
-            item.textContent = msg;
-            messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
+            createMessage(msg);
         });
 
         socket.on('user disconnect', function () {
-            var item = document.createElement('li');
-            item.innerHTML = '<i>Someone has disconnected</i>';
-            messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
+            createMessage('<i>Someone has disconnected</i>');
         });
 
         socket.on('user connect', function () {
-            var item = document.createElement('li');
-            item.innerHTML = '<i>Someone has connected</i>';
-            messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
+            createMessage('<i>Someone has connected</i>');
         });
     </script>
 </body>
