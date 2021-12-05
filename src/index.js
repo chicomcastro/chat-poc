@@ -31,7 +31,7 @@ function userStopTyping(socket) {
 
 function updateOnlineUsers() {
   io.allSockets().then((socketIds) => io.emit('update online users', {
-    users: [...socketIds.keys()].map((socketId) => nicknameMap[socketId]),
+    users: [...socketIds.keys()].map((socketId) => nicknameMap[socketId]).sort(),
   }));
 }
 

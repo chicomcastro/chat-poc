@@ -6,7 +6,8 @@
     <style>
         body {
             margin: 0;
-            padding-bottom: 3rem;
+            display: flex;
+            height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
@@ -70,10 +71,17 @@
             color: #fff;
         }
 
+        #main-content {
+            display: flex;
+            width: 100%;
+            padding-bottom: 4rem;
+        }
+
         #messages {
             list-style-type: none;
             margin: 0;
             padding: 0;
+            flex: 4;
         }
 
         #messages>li {
@@ -82,6 +90,25 @@
 
         #messages>li:nth-child(odd) {
             background: #efefef;
+        }
+
+        #online-users {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            width: 25%;
+            background-color: aliceblue;
+        }
+
+        #online-users>li {
+            padding: 0.25rem 1rem;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        #online-users>li:first-child {
+            padding: 0.5rem 1rem;
+            font-weight: normal;
         }
 
         #nickname-container {
@@ -94,7 +121,15 @@
 </head>
 
 <body>
-    <ul id="messages"></ul>
+    <div id="main-content">
+        <ul id="messages">
+            <li>Welcome to my super cool (although ugly and unresponsive) chat POC!</li>
+        </ul>
+        <ul id="online-users">
+            <li>Online users:</li>
+        </ul>
+    </div>
+
     <div id="bottom-container">
         <div id="observation-container">
             <span id="observation-text"></span>
@@ -121,6 +156,7 @@
         var messageForm = document.getElementById('message-form');
         var input = document.getElementById('input');
         var messages = document.getElementById('messages');
+        var onlineUsers = document.getElementById('online-users');
         var nicknameInput = document.getElementById('nickname-input');
         var nicknameForm = document.getElementById('nickname-form');
         var observationText = document.getElementById('observation-text');
@@ -181,8 +217,58 @@
             createMessage(msgData);
         });
 
+        function sortList(listId, startIndex) {
+            var list, i, switching, b, shouldSwitch;
+            list = document.getElementById(listId);
+            switching = true;
+            /* Make a loop that will continue until
+            no switching has been done: */
+            while (switching) {
+                // Start by saying: no switching is done:
+                switching = false;
+                b = list.getElementsByTagName("LI");
+                // Loop through all list items:
+                for (i = startIndex || 0; i < (b.length - 1); i++) {
+                    // Start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /* Check if the next item should
+                    switch place with the current item: */
+                    if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
+                        /* If next item is alphabetically lower than current item,
+                        mark as a switch and break the loop: */
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                if (shouldSwitch) {
+                    /* If a switch has been marked, make the switch
+                    and mark the switch as done: */
+                    b[i].parentNode.insertBefore(b[i + 1], b[i]);
+                    switching = true;
+                }
+            }
+        }
+
         function updateOnlineUsers(allUsers) {
-            console.log(allUsers)
+            const currentUserList = [...onlineUsers.children].filter((_, index) => index !== 0).map(child => child.innerText);
+            const usersToRemove = new Set([...currentUserList].filter(i => !allUsers.includes(i)));
+            usersToRemove.forEach(user => {
+                var item = document.getElementById(`user-${user}`);
+                onlineUsers.removeChild(item);
+            });
+            allUsers.forEach((user) => {
+                if (currentUserList.includes(user)) {
+                    return;
+                }
+                else {
+                    var item = document.createElement('li');
+                    item.id = `user-${user}`;
+                    item.innerText = user;
+                    onlineUsers.appendChild(item);
+                    onlineUsers.childNodes
+                }
+            });
+            sortList('online-users', 1);
         }
 
         socket.on('update online users', function ({ users }) {
