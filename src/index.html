@@ -91,6 +91,20 @@
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
+
+        socket.on('user disconnect', function () {
+            var item = document.createElement('li');
+            item.innerHTML = '<i>Someone has disconnected</i>';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        socket.on('user connect', function () {
+            var item = document.createElement('li');
+            item.innerHTML = '<i>Someone has connected</i>';
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
     </script>
 </body>
 
