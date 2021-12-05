@@ -29,19 +29,28 @@ function userStopTyping(socket) {
   socket.broadcast.emit('users typing', { users: [...usersTyping.keys()] });
 }
 
+function updateOnlineUsers() {
+  io.allSockets().then((socketIds) => io.emit('update online users', {
+    users: [...socketIds.keys()].map((socketId) => nicknameMap[socketId]),
+  }));
+}
+
 io.on('connection', (socket) => {
   const userId = socket.id;
   console.log(userId, 'connected');
   const initialNickname = `user-${userId}`;
   nicknameMap[userId] = initialNickname;
-  socket.broadcast.emit('user connect', { user: initialNickname });
+  updateOnlineUsers();
+  socket.emit('user connect', { user: initialNickname });
   socket.emit('set nickname', { nickname: initialNickname });
   socket.on('set nickname', (newNickname) => {
     console.log('Nickname change for userId', userId, '->', newNickname);
     nicknameMap[userId] = newNickname;
+    updateOnlineUsers();
   });
   socket.on('disconnect', () => {
     userStopTyping(socket);
+    updateOnlineUsers();
     socket.broadcast.emit('user disconnect', { user: nicknameMap[userId] });
     console.log(userId, 'disconnected');
   });
