@@ -1,0 +1,22 @@
+{
+  "name": "chat-example",
+  "version": "1.0.0",
+  "description": "Project to learn socket.io",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Francisco Castro <franciscommcastro@gmail.com> (https://github.com/chicomcastro)",
+  "license": "ISC",
+  "dependencies": {
+    "express": "4",
+    "socket.io": "^4.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.4.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3",
+    "nodemon": "^2.0.15"
+  }
+}
