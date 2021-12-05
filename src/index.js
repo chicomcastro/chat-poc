@@ -13,13 +13,14 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('a user connected');
   socket.broadcast.emit('user connect');
+  socket.emit('set nickname', { nickname: `user-${socket.id}` });
   socket.on('disconnect', () => {
     socket.broadcast.emit('user disconnect');
     console.log('a user disconnected');
   });
-  socket.on('chat message', (msg) => {
-    console.log(`message: ${msg}`);
-    socket.broadcast.emit('chat message', msg);
+  socket.on('chat message', (msgData) => {
+    console.log(`message from user ${msgData.user}: ${msgData.msg}`);
+    socket.broadcast.emit('chat message', msgData);
   });
 });
 

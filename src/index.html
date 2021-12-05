@@ -10,7 +10,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        #form {
+        #forms-container {
             background: rgba(0, 0, 0, 0.15);
             padding: 0.25rem;
             position: fixed;
@@ -23,7 +23,17 @@
             backdrop-filter: blur(10px);
         }
 
-        #input {
+        #form {
+            flex: 1;
+            display: flex;
+        }
+
+        #nickname-form {
+            display: flex;
+        }
+
+        #input,
+        #nickname-input {
             border: none;
             padding: 0 1rem;
             flex-grow: 1;
@@ -31,7 +41,8 @@
             margin: 0.25rem;
         }
 
-        #input:focus {
+        #input:focus,
+        #nickname-input:focus {
             outline: none;
         }
 
@@ -58,14 +69,29 @@
         #messages>li:nth-child(odd) {
             background: #efefef;
         }
+
+        #nickname-container {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 
 <body>
     <ul id="messages"></ul>
-    <form id="form" action="#">
-        <input id="input" type='text' autocomplete="off" /><button>Send</button>
-    </form>
+    <div id="forms-container">
+        <form id="nickname-form" action="">
+            <div id="nickname-container">
+                <span>Nickname: </span>
+            </div>
+            <input id="nickname-input" type='text' autocomplete="off" style="flex-grow: 0.05; width: 175px;"></input>
+        </form>
+        <form id="form" action="">
+            <input id="input" type='text' autocomplete="off" placeholder="Type your message..." /><button>Send</button>
+        </form>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -74,12 +100,18 @@
         var form = document.getElementById('form');
         var input = document.getElementById('input');
         var messages = document.getElementById('messages');
+        var nicknameInput = document.getElementById('nickname-input');
 
-        function createMessage(msg) {
+        function createMessage(msgData) {
             var item = document.createElement('li');
-            item.innerHTML = msg;
+            const {user, msg} = msgData;
+            item.innerHTML = `<b>[${new Date().toLocaleString()}] ${user || ''} said:</b> ${msg}`;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function getNickname() {
+            return nicknameInput.value;
         }
 
         // Client sending messages
@@ -87,15 +119,16 @@
             e.preventDefault();
             if (input.value) {
                 const msg = input.value;
-                socket.emit('chat message', msg);
+                const msgData = {user: getNickname(), msg};
+                socket.emit('chat message', msgData);
                 input.value = '';
-                createMessage(msg);
+                createMessage(msgData);
             }
         });
 
         // Client receiving messages
-        socket.on('chat message', function (msg) {
-            createMessage(msg);
+        socket.on('chat message', function (msgData) {
+            createMessage(msgData);
         });
 
         socket.on('user disconnect', function () {
@@ -104,6 +137,11 @@
 
         socket.on('user connect', function () {
             createMessage('<i>Someone has connected</i>');
+        });
+
+        socket.on('set nickname', function (data) {
+            const { nickname } = data;
+            nicknameInput.value = nickname;
         });
     </script>
 </body>
