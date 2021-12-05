@@ -11,28 +11,49 @@ app.get('/', (req, res) => {
 });
 
 const usersTyping = new Set();
+const nicknameMap = {};
+
+function userStartTyping(socket) {
+  const userId = socket.id;
+  const user = nicknameMap[userId];
+  usersTyping.add(user);
+  socket.broadcast.emit('users typing', { users: [...usersTyping.keys()] });
+}
+
+function userStopTyping(socket) {
+  const userId = socket.id;
+  const user = nicknameMap[userId];
+  if (usersTyping.has(user)) {
+    usersTyping.delete(user);
+  }
+  socket.broadcast.emit('users typing', { users: [...usersTyping.keys()] });
+}
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.broadcast.emit('user connect');
-  socket.emit('set nickname', { nickname: `user-${socket.id}` });
+  const userId = socket.id;
+  console.log(userId, 'connected');
+  const initialNickname = `user-${userId}`;
+  nicknameMap[userId] = initialNickname;
+  socket.broadcast.emit('user connect', { user: initialNickname });
+  socket.emit('set nickname', { nickname: initialNickname });
+  socket.on('set nickname', (newNickname) => {
+    console.log('Nickname change for userId', userId, '->', newNickname);
+    nicknameMap[userId] = newNickname;
+  });
   socket.on('disconnect', () => {
-    socket.broadcast.emit('user disconnect');
-    console.log('a user disconnected');
+    userStopTyping(socket);
+    socket.broadcast.emit('user disconnect', { user: nicknameMap[userId] });
+    console.log(userId, 'disconnected');
   });
   socket.on('chat message', (msgData) => {
     console.log(`message from user ${msgData.user}: ${msgData.msg}`);
     socket.broadcast.emit('chat message', msgData);
   });
-  socket.on('user start typing', (data) => {
-    const { user } = data;
-    usersTyping.add(user);
-    socket.broadcast.emit('users typing', { users: [...usersTyping.keys()] });
+  socket.on('user start typing', () => {
+    userStartTyping(socket);
   });
-  socket.on('user stop typing', (data) => {
-    const { user } = data;
-    usersTyping.delete(user);
-    socket.broadcast.emit('users typing', { users: [...usersTyping.keys()] });
+  socket.on('user stop typing', () => {
+    userStopTyping(socket);
   });
 });
 

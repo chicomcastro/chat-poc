@@ -122,7 +122,10 @@
         var input = document.getElementById('input');
         var messages = document.getElementById('messages');
         var nicknameInput = document.getElementById('nickname-input');
+        var nicknameForm = document.getElementById('nickname-form');
         var observationText = document.getElementById('observation-text');
+
+        var originalNickname;
 
         function createMessage(msgData) {
             var item = document.createElement('li');
@@ -138,7 +141,6 @@
 
         // Client sending messages
         messageForm.addEventListener('submit', function (e) {
-            console.log("asd")
             e.preventDefault();
             if (input.value) {
                 const msg = input.value;
@@ -149,14 +151,29 @@
             }
         });
 
+        nicknameForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+        });
+
+        nicknameInput.addEventListener('blur', function (e) {
+            e.preventDefault();
+            if (nicknameInput.value) {
+                const newNickname = nicknameInput.value;
+                socket.emit('set nickname', newNickname);
+            }
+            else {
+                nicknameInput.value = originalNickname
+            }
+        });
+
         input.addEventListener('focus', function (e) {
             console.log('focused')
-            socket.emit('user start typing', { user: getNickname() });
+            socket.emit('user start typing');
         });
 
         input.addEventListener('blur', function (e) {
             console.log('blur')
-            socket.emit('user stop typing', { user: getNickname() });
+            socket.emit('user stop typing');
         });
 
         // Client receiving messages
@@ -164,17 +181,17 @@
             createMessage(msgData);
         });
 
-        socket.on('user disconnect', function () {
-            createMessage({ msg: '<i>Someone has disconnected</i>' });
+        socket.on('user disconnect', function ({ user }) {
+            createMessage({ msg: `<i>${user} has disconnected</i>` });
         });
 
-        socket.on('user connect', function () {
-            createMessage({ msg: '<i>Someone has connected</i>' });
+        socket.on('user connect', function ({ user }) {
+            createMessage({ msg: `<i>${user} has connected</i>` });
         });
 
         socket.on('set nickname', function (data) {
             const { nickname } = data;
-            nicknameInput.value = nickname;
+            nicknameInput.value = originalNickname = nickname;
         });
 
         socket.on('users typing', function (data) {
