@@ -10,7 +10,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        #forms-container {
+        #bottom-container {
             background: rgba(0, 0, 0, 0.15);
             padding: 0.25rem;
             position: fixed;
@@ -18,12 +18,26 @@
             left: 0;
             right: 0;
             display: flex;
-            height: 3rem;
+            flex-direction: column;
             box-sizing: border-box;
             backdrop-filter: blur(10px);
         }
 
-        #form {
+        #observation-container {
+            display: flex;
+            font-size: 12px;
+        }
+
+        #observation-text {
+            margin-bottom: 8px;
+        }
+
+        #forms-container {
+            display: flex;
+            height: 3rem;
+        }
+
+        #message-form {
             flex: 1;
             display: flex;
         }
@@ -46,7 +60,7 @@
             outline: none;
         }
 
-        #form>button {
+        #message-form>button {
             background: #333;
             border: none;
             padding: 0 1rem;
@@ -81,31 +95,39 @@
 
 <body>
     <ul id="messages"></ul>
-    <div id="forms-container">
-        <form id="nickname-form" action="">
-            <div id="nickname-container">
-                <span>Nickname: </span>
-            </div>
-            <input id="nickname-input" type='text' autocomplete="off" style="flex-grow: 0.05; width: 175px;"></input>
-        </form>
-        <form id="form" action="">
-            <input id="input" type='text' autocomplete="off" placeholder="Type your message..." /><button>Send</button>
-        </form>
+    <div id="bottom-container">
+        <div id="observation-container">
+            <span id="observation-text"></span>
+        </div>
+        <div id="forms-container">
+            <form id="nickname-form" action="">
+                <div id="nickname-container">
+                    <span>Nickname: </span>
+                </div>
+                <input id="nickname-input" type='text' autocomplete="off"
+                    style="flex-grow: 0.05; width: 175px;"></input>
+            </form>
+            <form id="message-form" action="">
+                <input id="input" type='text' autocomplete="off"
+                    placeholder="Type your message..." /><button>Send</button>
+            </form>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
 
-        var form = document.getElementById('form');
+        var messageForm = document.getElementById('message-form');
         var input = document.getElementById('input');
         var messages = document.getElementById('messages');
         var nicknameInput = document.getElementById('nickname-input');
+        var observationText = document.getElementById('observation-text');
 
         function createMessage(msgData) {
             var item = document.createElement('li');
-            const {user, msg} = msgData;
-            item.innerHTML = `<b>[${new Date().toLocaleString()}] ${user || ''} said:</b> ${msg}`;
+            const { user, msg } = msgData;
+            item.innerHTML = `<b>[${new Date().toLocaleString()}] ${user ? `${user} said:</b>` : ''} ${msg}`;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         }
@@ -115,15 +137,26 @@
         }
 
         // Client sending messages
-        form.addEventListener('submit', function (e) {
+        messageForm.addEventListener('submit', function (e) {
+            console.log("asd")
             e.preventDefault();
             if (input.value) {
                 const msg = input.value;
-                const msgData = {user: getNickname(), msg};
+                const msgData = { user: getNickname(), msg };
                 socket.emit('chat message', msgData);
                 input.value = '';
                 createMessage(msgData);
             }
+        });
+
+        input.addEventListener('focus', function (e) {
+            console.log('focused')
+            socket.emit('user start typing', { user: getNickname() });
+        });
+
+        input.addEventListener('blur', function (e) {
+            console.log('blur')
+            socket.emit('user stop typing', { user: getNickname() });
         });
 
         // Client receiving messages
@@ -132,16 +165,26 @@
         });
 
         socket.on('user disconnect', function () {
-            createMessage('<i>Someone has disconnected</i>');
+            createMessage({ msg: '<i>Someone has disconnected</i>' });
         });
 
         socket.on('user connect', function () {
-            createMessage('<i>Someone has connected</i>');
+            createMessage({ msg: '<i>Someone has connected</i>' });
         });
 
         socket.on('set nickname', function (data) {
             const { nickname } = data;
             nicknameInput.value = nickname;
+        });
+
+        socket.on('users typing', function (data) {
+            const { users } = data;
+            if (users.length) {
+                observationText.textContent = `${users.join(", ")} ${users.length === 1 ? "is" : "are"} typing...`;
+            }
+            else {
+                observationText.textContent = "";
+            }
         });
     </script>
 </body>

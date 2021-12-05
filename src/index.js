@@ -10,6 +10,8 @@ app.get('/', (req, res) => {
   res.sendFile(`${__dirname}\\index.html`);
 });
 
+const usersTyping = new Set();
+
 io.on('connection', (socket) => {
   console.log('a user connected');
   socket.broadcast.emit('user connect');
@@ -21,6 +23,16 @@ io.on('connection', (socket) => {
   socket.on('chat message', (msgData) => {
     console.log(`message from user ${msgData.user}: ${msgData.msg}`);
     socket.broadcast.emit('chat message', msgData);
+  });
+  socket.on('user start typing', (data) => {
+    const { user } = data;
+    usersTyping.add(user);
+    socket.broadcast.emit('users typing', { users: [...usersTyping.keys()] });
+  });
+  socket.on('user stop typing', (data) => {
+    const { user } = data;
+    usersTyping.delete(user);
+    socket.broadcast.emit('users typing', { users: [...usersTyping.keys()] });
   });
 });
 
