@@ -263,7 +263,7 @@
       sortList('online-users', 1);
     }
 
-    // Client sending messages
+    // Events client could send
     messageForm.addEventListener('submit', function (e) {
       e.preventDefault();
       const privateMessagePrefix = privateMessageUser ? `[to ${privateMessageUser}] ` : '';
@@ -299,7 +299,7 @@
       socket.emit('user stop typing');
     });
 
-    // Client receiving messages
+    // Events client could receive
     socket.on('chat message', function (msgData) {
       createMessage(msgData);
     });
