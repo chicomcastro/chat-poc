@@ -81,7 +81,8 @@
             list-style-type: none;
             margin: 0;
             padding: 0;
-            flex: 4;
+            flex: 1;
+            overflow-y: scroll;
         }
 
         #messages>li {
@@ -109,6 +110,7 @@
         #online-users>li:first-child {
             padding: 0.5rem 1rem;
             font-weight: normal;
+            background-color: lightblue;
         }
 
         #nickname-container {
@@ -162,13 +164,15 @@
         var observationText = document.getElementById('observation-text');
 
         var originalNickname;
+        var privateMessageUser;
 
         function createMessage(msgData) {
             var item = document.createElement('li');
             const { user, msg } = msgData;
-            item.innerHTML = `<b>[${new Date().toLocaleString()}] ${user ? `${user} said:</b>` : ''} ${msg}`;
+            const privateMessagePrefix = privateMessageUser ? ` to ${privateMessageUser}` : '';
+            item.innerHTML = `<b>[${new Date().toLocaleString()}] ${user ? `${user} said${privateMessagePrefix}:</b>` : ''} ${msg}`;
             messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
+            item.scrollIntoView();
         }
 
         function getNickname() {
@@ -178,11 +182,12 @@
         // Client sending messages
         messageForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            if (input.value) {
-                const msg = input.value;
-                const msgData = { user: getNickname(), msg };
+            const privateMessagePrefix = privateMessageUser ? `[to ${privateMessageUser}]` : '';
+            const msg = input.value.replace(privateMessagePrefix, '').trim();
+            if (msg) {
+                const msgData = { user: getNickname(), msg, toUser: privateMessageUser };
                 socket.emit('chat message', msgData);
-                input.value = '';
+                input.value = privateMessagePrefix + " ";
                 createMessage(msgData);
             }
         });
@@ -265,7 +270,28 @@
                     item.id = `user-${user}`;
                     item.innerText = user;
                     onlineUsers.appendChild(item);
-                    onlineUsers.childNodes
+                    item.addEventListener('click', function () {
+                        input.value = input.value.replace(`[to ${privateMessageUser}]`, '');
+                        const privateMessagePrefix = `[to ${user}]`;
+                        if (privateMessageUser === user) {
+                            privateMessageUser = undefined;
+                            return;
+                        }
+                        console.log("oi");
+                        console.log(`user-${privateMessageUser}`);
+                        const previousSelectedElement = document.getElementById(`user-${privateMessageUser}`)
+                        if (previousSelectedElement) {
+                            previousSelectedElement.style.backgroundColor = 'transparent';
+                        }
+                        console.log("oi");
+                        privateMessageUser = user;
+                        console.log("oi");
+                        input.value = privateMessagePrefix + " " + input.value.trim();
+                        console.log("oi");
+                        input.focus();
+                        console.log("oi");
+                        item.style.backgroundColor = 'darkseagreen';
+                    });
                 }
             });
             sortList('online-users', 1);

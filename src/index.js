@@ -31,8 +31,14 @@ function userStopTyping(socket) {
 
 function updateOnlineUsers() {
   io.allSockets().then((socketIds) => io.emit('update online users', {
-    users: [...socketIds.keys()].map((socketId) => nicknameMap[socketId]).sort(),
+    users: [...socketIds.keys()]
+      .map((socketId) => nicknameMap[socketId])
+      .sort(),
   }));
+}
+
+function getKeyByValue(obj, searchValue) {
+  return Object.keys(obj).find((key) => obj[key] === searchValue);
 }
 
 io.on('connection', (socket) => {
@@ -55,7 +61,28 @@ io.on('connection', (socket) => {
     console.log(userId, 'disconnected');
   });
   socket.on('chat message', (msgData) => {
-    console.log(`message from user ${msgData.user}: ${msgData.msg}`);
+    console.log(
+      `message from user ${msgData.user} to ${msgData.toUser || 'all'}: ${
+        msgData.msg
+      }`,
+    );
+    if (msgData.user === msgData.toUser) {
+      return;
+    }
+    const isPrivateMessage = msgData.toUser;
+    if (isPrivateMessage) {
+      const targetSocketId = getKeyByValue(
+        nicknameMap,
+        msgData.toUser,
+      );
+      const targetSocket = io.sockets.sockets.get(targetSocketId);
+      if (targetSocket) {
+        targetSocket.emit('chat message', msgData);
+      } else {
+        socket.emit('chat message', { ...msgData, msg: 'User not found' });
+      }
+      return;
+    }
     socket.broadcast.emit('chat message', msgData);
   });
   socket.on('user start typing', () => {
