@@ -47,13 +47,21 @@
       display: flex;
     }
 
-    #input,
-    #nickname-input {
+    #input {
       border: none;
       padding: 0 1rem;
       flex-grow: 1;
       border-radius: 2rem;
       margin: 0.25rem;
+    }
+
+    #nickname-input {
+      border: none;
+      padding: 0 1rem;
+      border-radius: 2rem;
+      margin: 0.25rem;
+      flex-grow: 0.05;
+      width: 175px;
     }
 
     #input:focus,
@@ -91,6 +99,12 @@
 
     #messages>li:nth-child(odd) {
       background: #efefef;
+    }
+
+    #messages>li:first-child {
+      background-color: aliceblue;
+      font-weight: 500;
+      text-align: center;
     }
 
     #online-users {
@@ -142,7 +156,7 @@
         <div id="nickname-container">
           <span>Nickname: </span>
         </div>
-        <input id="nickname-input" type='text' autocomplete="off" style="flex-grow: 0.05; width: 175px;"></input>
+        <input id="nickname-input" type='text' autocomplete="off"></input>
       </form>
       <form id="message-form" action="">
         <input id="input" type='text' autocomplete="off" placeholder="Type your message..." /><button>Send</button>
