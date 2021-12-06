@@ -2,322 +2,321 @@
 <html>
 
 <head>
-    <title>Socket.IO chat</title>
-    <style>
-        body {
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+  <title>Socket.IO chat</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-        #bottom-container {
-            background: rgba(0, 0, 0, 0.15);
-            padding: 0.25rem;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
-        }
+    #bottom-container {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.25rem;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+    }
 
-        #observation-container {
-            display: flex;
-            font-size: 12px;
-        }
+    #observation-container {
+      display: flex;
+      font-size: 12px;
+    }
 
-        #observation-text {
-            margin-bottom: 8px;
-        }
+    #observation-text {
+      margin-bottom: 8px;
+    }
 
-        #forms-container {
-            display: flex;
-            height: 3rem;
-        }
+    #forms-container {
+      display: flex;
+      height: 3rem;
+    }
 
-        #message-form {
-            flex: 1;
-            display: flex;
-        }
+    #message-form {
+      flex: 1;
+      display: flex;
+    }
 
-        #nickname-form {
-            display: flex;
-        }
+    #nickname-form {
+      display: flex;
+    }
 
-        #input,
-        #nickname-input {
-            border: none;
-            padding: 0 1rem;
-            flex-grow: 1;
-            border-radius: 2rem;
-            margin: 0.25rem;
-        }
+    #input,
+    #nickname-input {
+      border: none;
+      padding: 0 1rem;
+      flex-grow: 1;
+      border-radius: 2rem;
+      margin: 0.25rem;
+    }
 
-        #input:focus,
-        #nickname-input:focus {
-            outline: none;
-        }
+    #input:focus,
+    #nickname-input:focus {
+      outline: none;
+    }
 
-        #message-form>button {
-            background: #333;
-            border: none;
-            padding: 0 1rem;
-            margin: 0.25rem;
-            border-radius: 3px;
-            outline: none;
-            color: #fff;
-        }
+    #message-form>button {
+      background: #333;
+      border: none;
+      padding: 0 1rem;
+      margin: 0.25rem;
+      border-radius: 3px;
+      outline: none;
+      color: #fff;
+    }
 
-        #main-content {
-            display: flex;
-            width: 100%;
-            padding-bottom: 4rem;
-        }
+    #main-content {
+      display: flex;
+      width: 100%;
+      padding-bottom: 4rem;
+    }
 
-        #messages {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            flex: 1;
-            overflow-y: auto;
-        }
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      flex: 1;
+      overflow-y: auto;
+    }
 
-        #messages>li {
-            padding: 0.5rem 1rem;
-        }
+    #messages>li {
+      padding: 0.5rem 1rem;
+    }
 
-        #messages>li:nth-child(odd) {
-            background: #efefef;
-        }
+    #messages>li:nth-child(odd) {
+      background: #efefef;
+    }
 
-        #online-users {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            width: 25%;
-            background-color: aliceblue;
-            overflow-y: auto;
-        }
+    #online-users {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      width: 25%;
+      background-color: aliceblue;
+      overflow-y: auto;
+    }
 
-        #online-users>li {
-            padding: 0.25rem 1rem;
-            font-weight: bold;
-            overflow-wrap: anywhere;
-        }
+    #online-users>li {
+      padding: 0.25rem 1rem;
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
 
-        #online-users>li:first-child {
-            padding: 0.5rem 1rem;
-            font-weight: normal;
-            background-color: lightblue;
-        }
+    #online-users>li:first-child {
+      padding: 0.5rem 1rem;
+      font-weight: normal;
+      background-color: lightblue;
+    }
 
-        #nickname-container {
-            display: flex;
-            align-items: center;
-            flex-direction: row;
-            margin-bottom: 4px;
-        }
-    </style>
+    #nickname-container {
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      margin-bottom: 4px;
+    }
+  </style>
 </head>
 
 <body>
-    <div id="main-content">
-        <ul id="messages">
-            <li>Welcome to my super cool (although ugly and unresponsive) chat POC!</li>
-        </ul>
-        <ul id="online-users">
-            <li>Online users:</li>
-        </ul>
+  <div id="main-content">
+    <ul id="messages">
+      <li>Welcome to my super cool (although ugly and unresponsive) chat POC!</li>
+    </ul>
+    <ul id="online-users">
+      <li>Online users:</li>
+    </ul>
+  </div>
+
+  <div id="bottom-container">
+    <div id="observation-container">
+      <span id="observation-text"></span>
     </div>
-
-    <div id="bottom-container">
-        <div id="observation-container">
-            <span id="observation-text"></span>
+    <div id="forms-container">
+      <form id="nickname-form" action="">
+        <div id="nickname-container">
+          <span>Nickname: </span>
         </div>
-        <div id="forms-container">
-            <form id="nickname-form" action="">
-                <div id="nickname-container">
-                    <span>Nickname: </span>
-                </div>
-                <input id="nickname-input" type='text' autocomplete="off"
-                    style="flex-grow: 0.05; width: 175px;"></input>
-            </form>
-            <form id="message-form" action="">
-                <input id="input" type='text' autocomplete="off"
-                    placeholder="Type your message..." /><button>Send</button>
-            </form>
-        </div>
+        <input id="nickname-input" type='text' autocomplete="off" style="flex-grow: 0.05; width: 175px;"></input>
+      </form>
+      <form id="message-form" action="">
+        <input id="input" type='text' autocomplete="off" placeholder="Type your message..." /><button>Send</button>
+      </form>
     </div>
+  </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io();
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
 
-        var messageForm = document.getElementById('message-form');
-        var input = document.getElementById('input');
-        var messages = document.getElementById('messages');
-        var onlineUsers = document.getElementById('online-users');
-        var nicknameInput = document.getElementById('nickname-input');
-        var nicknameForm = document.getElementById('nickname-form');
-        var observationText = document.getElementById('observation-text');
+    var messageForm = document.getElementById('message-form');
+    var input = document.getElementById('input');
+    var messages = document.getElementById('messages');
+    var onlineUsers = document.getElementById('online-users');
+    var nicknameInput = document.getElementById('nickname-input');
+    var nicknameForm = document.getElementById('nickname-form');
+    var observationText = document.getElementById('observation-text');
 
-        var originalNickname;
-        var privateMessageUser;
+    var originalNickname;
+    var privateMessageUser;
 
-        function createMessage(msgData) {
-            var item = document.createElement('li');
-            const { user, msg } = msgData;
-            const privateMessagePrefix = privateMessageUser ? ` to ${privateMessageUser}` : '';
-            item.innerHTML = `<b>[${new Date().toLocaleString()}] ${user ? `${user} said${privateMessagePrefix}:</b>` : ''} ${msg}`;
-            messages.appendChild(item);
-            item.scrollIntoView();
+    function createMessage(msgData) {
+      var item = document.createElement('li');
+      const { user, msg } = msgData;
+      const privateMessagePrefix = privateMessageUser ? ` to ${privateMessageUser}` : '';
+      item.innerHTML = `<b>[${new Date().toLocaleString()}] ${user ? `${user} said${privateMessagePrefix}:</b>` : ''} ${msg}`;
+      messages.appendChild(item);
+      item.scrollIntoView();
+    }
+
+    function getNickname() {
+      return nicknameInput.value;
+    }
+
+    // From https://www.w3schools.com/howto/howto_js_sort_list.asp
+    function sortList(listId, startIndex) {
+      var list, i, switching, b, shouldSwitch;
+      list = document.getElementById(listId);
+      switching = true;
+      /* Make a loop that will continue until
+      no switching has been done: */
+      while (switching) {
+        // Start by saying: no switching is done:
+        switching = false;
+        b = list.getElementsByTagName("LI");
+        // Loop through all list items:
+        for (i = startIndex || 0; i < (b.length - 1); i++) {
+          // Start by saying there should be no switching:
+          shouldSwitch = false;
+          /* Check if the next item should
+          switch place with the current item: */
+          if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
+            /* If next item is alphabetically lower than current item,
+            mark as a switch and break the loop: */
+            shouldSwitch = true;
+            break;
+          }
         }
-
-        function getNickname() {
-            return nicknameInput.value;
+        if (shouldSwitch) {
+          /* If a switch has been marked, make the switch
+          and mark the switch as done: */
+          b[i].parentNode.insertBefore(b[i + 1], b[i]);
+          switching = true;
         }
+      }
+    }
 
-        // Client sending messages
-        messageForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const privateMessagePrefix = privateMessageUser ? `[to ${privateMessageUser}] ` : '';
-            const msg = input.value.replace(privateMessagePrefix, '').trim();
-            if (msg) {
-                const msgData = { user: getNickname(), msg, toUser: privateMessageUser };
-                socket.emit('chat message', msgData);
-                input.value = privateMessagePrefix;
-                createMessage(msgData);
-            }
-        });
-
-        nicknameForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-        });
-
-        nicknameInput.addEventListener('blur', function (e) {
-            e.preventDefault();
-            if (nicknameInput.value) {
-                const newNickname = nicknameInput.value;
-                socket.emit('set nickname', newNickname);
-            }
-            else {
-                nicknameInput.value = originalNickname
-            }
-        });
-
-        input.addEventListener('focus', function (e) {
-            socket.emit('user start typing');
-        });
-
-        input.addEventListener('blur', function (e) {
-            socket.emit('user stop typing');
-        });
-
-        // Client receiving messages
-        socket.on('chat message', function (msgData) {
-            createMessage(msgData);
-        });
-
-        function sortList(listId, startIndex) {
-            var list, i, switching, b, shouldSwitch;
-            list = document.getElementById(listId);
-            switching = true;
-            /* Make a loop that will continue until
-            no switching has been done: */
-            while (switching) {
-                // Start by saying: no switching is done:
-                switching = false;
-                b = list.getElementsByTagName("LI");
-                // Loop through all list items:
-                for (i = startIndex || 0; i < (b.length - 1); i++) {
-                    // Start by saying there should be no switching:
-                    shouldSwitch = false;
-                    /* Check if the next item should
-                    switch place with the current item: */
-                    if (b[i].innerHTML.toLowerCase() > b[i + 1].innerHTML.toLowerCase()) {
-                        /* If next item is alphabetically lower than current item,
-                        mark as a switch and break the loop: */
-                        shouldSwitch = true;
-                        break;
-                    }
-                }
-                if (shouldSwitch) {
-                    /* If a switch has been marked, make the switch
-                    and mark the switch as done: */
-                    b[i].parentNode.insertBefore(b[i + 1], b[i]);
-                    switching = true;
-                }
-            }
+    function updateOnlineUsers(allUsers) {
+      const currentUserList = [...onlineUsers.children].filter((_, index) => index !== 0).map(child => child.innerText);
+      const usersToRemove = new Set([...currentUserList].filter(i => !allUsers.includes(i)));
+      usersToRemove.forEach(user => {
+        var item = document.getElementById(`user-${user}`);
+        onlineUsers.removeChild(item);
+      });
+      allUsers.forEach((user) => {
+        if (currentUserList.includes(user)) {
+          return;
         }
-
-        function updateOnlineUsers(allUsers) {
-            const currentUserList = [...onlineUsers.children].filter((_, index) => index !== 0).map(child => child.innerText);
-            const usersToRemove = new Set([...currentUserList].filter(i => !allUsers.includes(i)));
-            usersToRemove.forEach(user => {
-                var item = document.getElementById(`user-${user}`);
-                onlineUsers.removeChild(item);
-            });
-            allUsers.forEach((user) => {
-                if (currentUserList.includes(user)) {
-                    return;
-                }
-                else {
-                    var item = document.createElement('li');
-                    item.id = `user-${user}`;
-                    item.innerText = user;
-                    onlineUsers.appendChild(item);
-                    item.addEventListener('click', function () {
-                        input.value = input.value.replace(`[to ${privateMessageUser}]`, '');
-                        const privateMessagePrefix = `[to ${user}]`;
-                        const previousSelectedElement = document.getElementById(`user-${privateMessageUser}`)
-                        if (previousSelectedElement) {
-                            previousSelectedElement.style.backgroundColor = 'transparent';
-                        }
-                        if (privateMessageUser === user) {
-                            privateMessageUser = undefined;
-                            input.value = '';
-                            return;
-                        }
-                        privateMessageUser = user;
-                        input.value = privateMessagePrefix + " " + input.value.trim();
-                        input.focus();
-                        item.style.backgroundColor = 'darkseagreen';
-                    });
-                }
-            });
-            sortList('online-users', 1);
+        else {
+          var item = document.createElement('li');
+          item.id = `user-${user}`;
+          item.innerText = user;
+          onlineUsers.appendChild(item);
+          item.addEventListener('click', function () {
+            input.value = input.value.replace(`[to ${privateMessageUser}]`, '');
+            const privateMessagePrefix = `[to ${user}]`;
+            const previousSelectedElement = document.getElementById(`user-${privateMessageUser}`)
+            if (previousSelectedElement) {
+              previousSelectedElement.style.backgroundColor = 'transparent';
+            }
+            if (privateMessageUser === user) {
+              privateMessageUser = undefined;
+              input.value = '';
+              return;
+            }
+            privateMessageUser = user;
+            input.value = privateMessagePrefix + " " + input.value.trim();
+            input.focus();
+            item.style.backgroundColor = 'darkseagreen';
+          });
         }
+      });
+      sortList('online-users', 1);
+    }
 
-        socket.on('update online users', function ({ users }) {
-            updateOnlineUsers(users);
-        });
+    // Client sending messages
+    messageForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const privateMessagePrefix = privateMessageUser ? `[to ${privateMessageUser}] ` : '';
+      const msg = input.value.replace(privateMessagePrefix, '').trim();
+      if (msg) {
+        const msgData = { user: getNickname(), msg, toUser: privateMessageUser };
+        socket.emit('chat message', msgData);
+        input.value = privateMessagePrefix;
+        createMessage(msgData);
+      }
+    });
 
-        socket.on('user disconnect', function ({ user, allUsers }) {
-            createMessage({ msg: `<i>${user} has disconnected</i>` });
-        });
+    nicknameForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+    });
 
-        socket.on('user connect', function ({ user, allUsers }) {
-            createMessage({ msg: `<i>${user} has connected</i>` });
-        });
+    nicknameInput.addEventListener('blur', function (e) {
+      e.preventDefault();
+      if (nicknameInput.value) {
+        const newNickname = nicknameInput.value;
+        socket.emit('set nickname', newNickname);
+      }
+      else {
+        nicknameInput.value = originalNickname
+      }
+    });
 
-        socket.on('set nickname', function (data) {
-            const { nickname } = data;
-            nicknameInput.value = originalNickname = nickname;
-        });
+    input.addEventListener('focus', function (e) {
+      socket.emit('user start typing');
+    });
 
-        socket.on('users typing', function (data) {
-            const { users } = data;
-            if (users.length) {
-                observationText.textContent = `${users.join(", ")} ${users.length === 1 ? "is" : "are"} typing...`;
-            }
-            else {
-                observationText.textContent = "";
-            }
-        });
-    </script>
+    input.addEventListener('blur', function (e) {
+      socket.emit('user stop typing');
+    });
+
+    // Client receiving messages
+    socket.on('chat message', function (msgData) {
+      createMessage(msgData);
+    });
+
+    socket.on('update online users', function ({ users }) {
+      updateOnlineUsers(users);
+    });
+
+    socket.on('user disconnect', function ({ user, allUsers }) {
+      createMessage({ msg: `<i>${user} has disconnected</i>` });
+    });
+
+    socket.on('user connect', function ({ user, allUsers }) {
+      createMessage({ msg: `<i>${user} has connected</i>` });
+    });
+
+    socket.on('set nickname', function (data) {
+      const { nickname } = data;
+      nicknameInput.value = originalNickname = nickname;
+    });
+
+    socket.on('users typing', function (data) {
+      const { users } = data;
+      if (users.length) {
+        observationText.textContent = `${users.join(", ")} ${users.length === 1 ? "is" : "are"} typing...`;
+      }
+      else {
+        observationText.textContent = "";
+      }
+    });
+  </script>
 </body>
 
 </html>
