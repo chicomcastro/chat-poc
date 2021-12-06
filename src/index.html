@@ -208,12 +208,10 @@
         });
 
         input.addEventListener('focus', function (e) {
-            console.log('focused')
             socket.emit('user start typing');
         });
 
         input.addEventListener('blur', function (e) {
-            console.log('blur')
             socket.emit('user stop typing');
         });
 
@@ -273,23 +271,18 @@
                     item.addEventListener('click', function () {
                         input.value = input.value.replace(`[to ${privateMessageUser}]`, '');
                         const privateMessagePrefix = `[to ${user}]`;
-                        if (privateMessageUser === user) {
-                            privateMessageUser = undefined;
-                            return;
-                        }
-                        console.log("oi");
-                        console.log(`user-${privateMessageUser}`);
                         const previousSelectedElement = document.getElementById(`user-${privateMessageUser}`)
                         if (previousSelectedElement) {
                             previousSelectedElement.style.backgroundColor = 'transparent';
                         }
-                        console.log("oi");
+                        if (privateMessageUser === user) {
+                            privateMessageUser = undefined;
+                            input.value = '';
+                            return;
+                        }
                         privateMessageUser = user;
-                        console.log("oi");
                         input.value = privateMessagePrefix + " " + input.value.trim();
-                        console.log("oi");
                         input.focus();
-                        console.log("oi");
                         item.style.backgroundColor = 'darkseagreen';
                     });
                 }
