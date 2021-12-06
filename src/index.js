@@ -8,7 +8,7 @@ const io = new Server(server);
 
 // Express routes
 app.get('/', (req, res) => {
-  res.sendFile(`${__dirname}\\index.html`);
+  res.sendFile(`${__dirname}/index.html`);
 });
 
 // Socket.io-related logic
